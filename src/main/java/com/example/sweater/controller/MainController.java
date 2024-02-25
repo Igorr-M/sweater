@@ -5,6 +5,7 @@ import com.example.sweater.domain.User;
 import com.example.sweater.repos.MessageRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,12 +28,13 @@ public class MainController {
     private String uploadPath;
 
     @GetMapping("/")
-    public String greeting(Map<String,Object> model) {
+    public String greeting(Model model, Authentication authentication) {
+        model.addAttribute("userAut", authentication.getPrincipal());
         return "greeting";
     }
 
     @GetMapping("/main")
-    public String main(@RequestParam(required = false, defaultValue = "") String filter, Model model) {
+    public String main(@RequestParam(required = false, defaultValue = "") String filter, Model model, Authentication authentication) {
         Iterable<Message> messages = messageRepo.findAll();
 
         if (filter != null && !filter.isEmpty()) {
@@ -43,6 +45,7 @@ public class MainController {
 
         model.addAttribute("messages", messages);
         model.addAttribute("filter", filter);
+        model.addAttribute("userAut", authentication.getPrincipal());
         return "main";
     }
 
@@ -51,7 +54,8 @@ public class MainController {
             @AuthenticationPrincipal User user,
             @RequestParam String text,
             @RequestParam String tag, Map<String,Object> model,
-            @RequestParam("file")MultipartFile file
+            @RequestParam("file")MultipartFile file,
+            Authentication authentication
     ) throws IOException {
         Message message = new Message(text, tag, user);
 
@@ -69,6 +73,7 @@ public class MainController {
         messageRepo.save(message);
         Iterable<Message> messages = messageRepo.findAll();
         model.put("messages", messages);
+        model.put("userAut", authentication.getPrincipal());
         return "main";
     }
 }

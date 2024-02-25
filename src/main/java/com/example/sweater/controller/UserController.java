@@ -5,6 +5,7 @@ import com.example.sweater.domain.User;
 import com.example.sweater.repos.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,15 +23,17 @@ public class UserController {
     private UserRepo userRepo;
 
     @GetMapping
-    public String userList(Model model) {
+    public String userList(Model model, Authentication authentication) {
         model.addAttribute("users", userRepo.findAll());
+        model.addAttribute("userAut", authentication.getPrincipal());
         return "userList";
     }
 
     @GetMapping("{user}")
-    public String userEditForm(@PathVariable User user, Model model) {
+    public String userEditForm(@PathVariable User user, Model model, Authentication authentication) {
         model.addAttribute("user", user);
         model.addAttribute("roles", Role.values());
+        model.addAttribute("userAut", authentication.getPrincipal());
         return "userEdit";
     }
 
@@ -38,7 +41,8 @@ public class UserController {
     public String userSave(
             @RequestParam String username,
             @RequestParam Map<String,String> form,
-            @RequestParam("userId") User user
+            @RequestParam("userId") User user,
+            Model model, Authentication authentication
     ) {
         user.setUsername(username);
         Set<String> roles = Arrays.stream(Role.values())
@@ -51,6 +55,7 @@ public class UserController {
             }
         }
         userRepo.save(user);
+        model.addAttribute("userAut", authentication.getPrincipal());
         return "redirect:/user";
     }
 }
