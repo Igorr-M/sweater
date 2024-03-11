@@ -21,7 +21,7 @@
         </div>
         </#if>
         <#if !isRegisterForm><a href ="/registration">Add new user</a></#if>
-        <button class="btn btn-primary" type="submit"><#if isRegisterForm>Create<#else>Sign In</#if></button
+        <button class="btn btn-primary" type="submit"><#if isRegisterForm>Create<#else>Sign In</#if></button>
     </form>
 </#macro>
 
